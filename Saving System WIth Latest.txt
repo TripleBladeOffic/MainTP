@@ -121,7 +121,7 @@ for _, item in ipairs(items) do
 
                     local NewPart    = Instance.new("Part")
                     NewPart.CFrame   = child.MainCFrame.Value * CFrame.new(0, 0, 0)
-                    NewPart.Position = NewPart.Position + Vector3.new(0, 0, 0)
+                    NewPart.Position = NewPart.Position + Vector3.new(179, 0, 322)
 
                     if Owner and Type and ItemName and BlueprintWoodClass and MainCFrame and BuildDependentWood then
                         while child:IsDescendantOf(PlayerModels) do
