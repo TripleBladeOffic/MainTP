@@ -1,0 +1,147 @@
+-- Function to save a CFrame to a file
+local function saveCFrameToFile(cframe)
+    local fileName = "myfile.txt"
+    -- Convert CFrame to string, retaining all its components
+    local cframeString = string.format(
+        "CFrame.new(%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f)",
+        cframe:GetComponents()
+    )
+
+    if isfile(fileName) then
+        -- Append the CFrame to the file
+        local existingContent = readfile(fileName)
+        writefile(fileName, existingContent .. cframeString .. "\n")
+    else
+        -- Create the file and write the first CFrame
+        writefile(fileName, cframeString .. "\n")
+    end
+    print("Saved CFrame to file: " .. cframeString)
+end
+
+local items = {
+    "Wall1",
+    "Wall1Corner",
+    "Wall1ShortCorner",
+    "Wall1ShortThin",
+    "Wall1Tall",
+    "Wall1TallThin",
+    "Wall2",
+    "Wall2Corner",
+    "Wall2Short",
+    "Wall2ShortCorner",
+    "Wall2ShortThin",
+    "Wall2Tall",
+    "Wall2TallCorner",
+    "Wall2TallThin", -- here rn
+    "Wall2Thin",
+    "Wall3",
+    "Wall3Corner",
+    "Wall3Tall",
+    "Wall3TallCorner",
+    "Wall3TallThin",
+    "Wall3Thin",
+    "Floor1",
+    "Floor1Large",
+    "Floor1Small",
+    "Floor1Tiny",
+    "Cabinet1",
+    "Cabinet1CornerTight",
+    "Cabinet1CornerWide",
+    "Cabinet1Thin",
+    "Chair1",
+    "CounterTop",
+    "CounterTop1Sink",
+    "CounterTop1Thin",
+    "Door1",
+    "Door2",
+    "Door3",
+    "Ladder1",
+    "Post",
+    "Stair1",
+    "Stair2",
+    "Table1",
+    "Table2",
+    "Wedge1",
+    "Wedge10",
+    "Wedge10_Thin",
+    "Wedge1_Thin",
+    "Wedge2",
+    "Wedge2_Thin",
+    "Wedge3",
+    "Wedge3_Thin",
+    "Wedge4",
+    "Wedge4_Thin",
+    "Wedge5",
+    "Wedge5_Thin",
+    "Wedge6",
+    "Wedge6_Thin",
+    "Wedge7",
+    "Wedge7_Thin",
+    "Wedge8",
+    "Wedge8_Thin",
+    "Wedge9",
+    "Wedge9_Thin"
+}
+
+local Count = 0
+local PlayerModels = game.workspace.PlayerModels
+local LocalPlayer = game:GetService("Players").LocalPlayer.Name
+
+-- Existing logic
+for _, item in ipairs(items) do
+    for _, child in ipairs(PlayerModels:GetChildren()) do
+        if child.Name == item then
+            local FoundOwner = child:FindFirstChild("Owner")
+            if FoundOwner then
+                -- Clean strings
+                FoundOwner = tostring(FoundOwner.Value):gsub("^%s*(.-)%s*$", "%1")
+                LocalPlayer = LocalPlayer:gsub("^%s*(.-)%s*$", "%1")
+                local TypeOf = child:FindFirstChild("Type")
+                if TypeOf then
+                    TypeOf = tostring(TypeOf.Value)
+                end
+
+                if FoundOwner == LocalPlayer and TypeOf == "Structure" then
+                    Count = Count + 1
+                    local Owner = child:FindFirstChild("Owner").Value
+                    local Type = child:FindFirstChild("Type").Value
+                    local ItemName = child:FindFirstChild("ItemName").Value
+                    print(ItemName .. "    " .. Count)
+                    local BlueprintWoodClass = child:FindFirstChild("BlueprintWoodClass")
+                    if BlueprintWoodClass then
+                        BlueprintWoodClass = BlueprintWoodClass.Value
+                    end
+                    local MainCFrame = child:FindFirstChild("MainCFrame").Value
+                    local BuildDependentWood = child:FindFirstChild("BuildDependentWood")
+
+                    -- Save MainCFrame to myfile.txt
+                    saveCFrameToFile(MainCFrame)
+
+                    BuildDependentWood.BrickColor = BrickColor.new("Really red")
+
+                    local NewPart    = Instance.new("Part")
+                    NewPart.CFrame   = child.MainCFrame.Value * CFrame.new(0, 0, 0)
+                    NewPart.Position = NewPart.Position + Vector3.new(0, 0, 0)
+
+                    if Owner and Type and ItemName and BlueprintWoodClass and MainCFrame and BuildDependentWood then
+                        while child:IsDescendantOf(PlayerModels) do
+                            wait()
+                            local args = {
+                                [1] = ItemName,
+                                [2] = NewPart.CFrame,
+                                [3] = game:GetService("Players").LocalPlayer,
+                                [4] = BlueprintWoodClass,
+                                [5] = child,
+                                [6] = true
+                            }
+                            game:GetService("ReplicatedStorage"):WaitForChild("PlaceStructure"):WaitForChild("ClientPlacedStructure"):FireServer(unpack(args))
+                        end
+                    end
+
+                    NewPart:Destroy()
+                    print("Finished")
+                end
+            end
+        end
+    end
+end
